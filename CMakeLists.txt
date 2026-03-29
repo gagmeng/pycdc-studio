@@ -9,11 +9,17 @@ set(CMAKE_AUTORCC ON)
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
-find_package(QT NAMES Qt6 Qt5 REQUIRED COMPONENTS Widgets Network)
-find_package(Qt${QT_VERSION_MAJOR} REQUIRED COMPONENTS Widgets Network)
+find_package(QT NAMES Qt6 Qt5 REQUIRED COMPONENTS Widgets Network LinguistTools)
+find_package(Qt${QT_VERSION_MAJOR} REQUIRED COMPONENTS Widgets Network LinguistTools)
+
+set(TS_FILES
+    i18n/pycdc_studio_zh_CN.ts
+)
 
 set(PROJECT_SOURCES
     main.cpp
+    src/app/app_settings.cpp
+    src/app/app_settings.h
     src/app/app_context.cpp
     src/app/app_context.h
     src/ai/ai_provider_config.cpp
@@ -65,6 +71,35 @@ endif()
 target_include_directories(pycdc-studio PRIVATE ${CMAKE_CURRENT_SOURCE_DIR})
 
 target_link_libraries(pycdc-studio PRIVATE Qt${QT_VERSION_MAJOR}::Widgets Qt${QT_VERSION_MAJOR}::Network)
+
+set_source_files_properties(resources/styles/app.qss PROPERTIES
+    QT_RESOURCE_ALIAS "styles/app.qss"
+)
+
+qt_add_resources(pycdc-studio "app_resources"
+    PREFIX "/"
+    FILES
+        resources/styles/app.qss
+)
+
+if(QT_VERSION_MAJOR EQUAL 6)
+    qt_add_translations(pycdc-studio
+        TS_FILES ${TS_FILES}
+        QM_FILES_OUTPUT_VARIABLE QM_FILES
+    )
+
+    foreach(qm_file IN LISTS QM_FILES)
+        get_filename_component(qm_name "${qm_file}" NAME)
+        set_source_files_properties("${qm_file}" PROPERTIES
+            QT_RESOURCE_ALIAS "${qm_name}"
+        )
+    endforeach()
+
+    qt_add_resources(pycdc-studio "i18n_translations"
+        PREFIX "/i18n"
+        FILES ${QM_FILES}
+    )
+endif()
 
 if(${QT_VERSION} VERSION_LESS 6.1.0)
   set(BUNDLE_ID_OPTION MACOSX_BUNDLE_GUI_IDENTIFIER com.example.pycdc-studio)

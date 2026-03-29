@@ -5,6 +5,7 @@
 
 class QLineEdit;
 class QPlainTextEdit;
+class QComboBox;
 
 class SettingsDialog : public QDialog
 {
@@ -12,6 +13,7 @@ class SettingsDialog : public QDialog
 
 public:
     explicit SettingsDialog(QWidget *parent = nullptr);
+    bool restartRequired() const { return m_restartRequired; }
 
 private slots:
     void saveAndAccept();
@@ -23,6 +25,9 @@ private:
     QLineEdit *m_apiKeyEdit = nullptr;
     QLineEdit *m_modelEdit = nullptr;
     QPlainTextEdit *m_systemPromptEdit = nullptr;
+    QComboBox *m_languageCombo = nullptr;
+    QString m_initialLanguage;
+    bool m_restartRequired = false;
 };
 
 #endif // SETTINGS_DIALOG_H

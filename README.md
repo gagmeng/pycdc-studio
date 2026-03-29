@@ -1,5 +1,7 @@
 # pycdc-studio
 
+[中文说明](./README_CN.md)
+
 A Qt Widgets desktop UI for exploring Python bytecode with `pycdc` / `pycdas`, inspecting native decompilation results, and retrying unsupported code objects with AI fallback.
 
 ## What it does

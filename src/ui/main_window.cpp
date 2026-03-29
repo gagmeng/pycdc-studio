@@ -2,6 +2,7 @@
 
 #include <QAction>
 #include <QBrush>
+#include <QCoreApplication>
 #include <QDir>
 #include <QDirIterator>
 #include <QDragEnterEvent>
@@ -15,6 +16,7 @@
 #include <QLabel>
 #include <QMenu>
 #include <QMenuBar>
+#include <QMessageBox>
 #include <QMimeData>
 #include <QPlainTextEdit>
 #include <QPushButton>
@@ -31,6 +33,7 @@
 #include <QVBoxLayout>
 #include <QWidget>
 
+#include "src/app/app_settings.h"
 #include "src/app/app_context.h"
 #include "src/model/code_object_node.h"
 #include "src/model/project_session.h"
@@ -45,6 +48,14 @@ constexpr int kNodeIdRole = Qt::UserRole + 1;
 QString joinOrDash(const QStringList &values)
 {
     return values.isEmpty() ? QStringLiteral("-") : values.join(QStringLiteral(", "));
+}
+
+void appendMetadataList(QString &metadata, const QString &label, const QStringList &values, bool hideWhenEmpty = false)
+{
+    if (hideWhenEmpty && values.isEmpty()) {
+        return;
+    }
+    metadata += QStringLiteral("%1: %2\n").arg(label, joinOrDash(values));
 }
 
 bool isSupportedBytecodeFile(const QString &filePath)
@@ -239,6 +250,7 @@ MainWindow::MainWindow(AppContext *context, QWidget *parent)
     : QMainWindow(parent)
     , m_context(context)
 {
+    setObjectName(QStringLiteral("mainWindow"));
     buildUi();
     buildMenus();
     connectSignals();
@@ -425,168 +437,6 @@ void MainWindow::buildUi()
     statusBar()->setSizeGripEnabled(false);
     statusBar()->showMessage(tr("Ready"));
 
-    setStyleSheet(QStringLiteral(R"(
-        QMainWindow {
-            background: #edf3f9;
-        }
-        QWidget#centralPanel {
-            background: transparent;
-        }
-        QFrame#heroCard {
-            background: qlineargradient(x1:0, y1:0, x2:1, y2:1,
-                                        stop:0 #f9fbff,
-                                        stop:1 #eef5ff);
-            border: 1px solid #d7e2f0;
-            border-radius: 20px;
-        }
-        QLabel#heroIconBadge {
-            background: qlineargradient(x1:0, y1:0, x2:1, y2:1,
-                                        stop:0 #2f7cff,
-                                        stop:1 #153a74);
-            border: 1px solid rgba(255, 255, 255, 0.32);
-            border-radius: 16px;
-        }
-        QLabel#heroTitle {
-            color: #13253d;
-            font-size: 28px;
-            font-weight: 700;
-        }
-        QLabel#heroSubtitle {
-            color: #5c6f87;
-            font-size: 13px;
-        }
-        QLabel#heroActionHint {
-            color: #667a92;
-            font-size: 12px;
-        }
-        QPushButton#primaryActionButton {
-            background: qlineargradient(x1:0, y1:0, x2:1, y2:1,
-                                        stop:0 #3a7dff,
-                                        stop:1 #2454e6);
-            color: #ffffff;
-            border: none;
-            border-radius: 14px;
-            padding: 10px 18px;
-            font-size: 13px;
-            font-weight: 700;
-            min-width: 180px;
-        }
-        QPushButton#primaryActionButton:hover {
-            background: qlineargradient(x1:0, y1:0, x2:1, y2:1,
-                                        stop:0 #4b89ff,
-                                        stop:1 #315efb);
-        }
-        QPushButton#primaryActionButton:pressed {
-            background: #214cd0;
-        }
-        QFrame#infoChip {
-            background: rgba(255, 255, 255, 0.86);
-            border: 1px solid #dbe6f3;
-            border-radius: 16px;
-        }
-        QLabel#infoChipIcon {
-            background: #f4f8ff;
-            border: 1px solid #deebfb;
-            border-radius: 10px;
-        }
-        QLabel#infoChipTitle {
-            color: #18304a;
-            font-size: 13px;
-            font-weight: 650;
-        }
-        QLabel#infoChipCaption {
-            color: #667a92;
-            font-size: 12px;
-        }
-        QMenuBar {
-            background: transparent;
-            border: none;
-            padding: 4px 8px;
-        }
-        QMenuBar::item {
-            padding: 6px 10px;
-            border-radius: 8px;
-            color: #23364f;
-        }
-        QMenuBar::item:selected {
-            background: #e6eef8;
-        }
-        QMenu {
-            background: #ffffff;
-            border: 1px solid #d7e2f0;
-            padding: 6px;
-            border-radius: 12px;
-        }
-        QMenu::item {
-            padding: 7px 18px;
-            border-radius: 8px;
-        }
-        QMenu::item:selected {
-            background: #e6eef8;
-        }
-        QTreeWidget, QPlainTextEdit {
-            background: #fbfdff;
-            color: #17304a;
-            border: 1px solid #d7e2f0;
-            border-radius: 16px;
-            selection-background-color: #d7e7ff;
-            selection-color: #17304a;
-            alternate-background-color: #f3f7fc;
-        }
-        QTreeWidget::item {
-            padding: 6px 4px;
-        }
-        QTreeWidget::item:selected {
-            background: #dfeafe;
-            color: #13253d;
-        }
-        QHeaderView {
-            background: transparent;
-        }
-        QHeaderView::section {
-            background: transparent;
-            color: #5a6d84;
-            border: none;
-            padding: 10px 10px 12px 10px;
-            font-weight: 650;
-        }
-        QTabWidget::pane {
-            border: 1px solid #d7e2f0;
-            border-top: none;
-            border-radius: 16px;
-            background: #fbfdff;
-            top: 6px;
-        }
-        QTabBar::tab {
-            background: transparent;
-            color: #647891;
-            padding: 8px 14px;
-            margin-right: 8px;
-            margin-top: 6px;
-            border: 1px solid transparent;
-            border-radius: 999px;
-            min-width: 92px;
-        }
-        QTabBar::tab:selected {
-            background: #edf4ff;
-            color: #18304a;
-            border-color: #d8e7ff;
-        }
-        QTabBar::tab:hover:!selected {
-            background: #f4f8ff;
-            color: #23364f;
-        }
-        QSplitter::handle {
-            background: transparent;
-            width: 10px;
-        }
-        QStatusBar {
-            background: #ffffff;
-            color: #5a6d84;
-            border-top: 1px solid #d7e2f0;
-        }
-    )"));
-
     connect(retryButton, &QPushButton::clicked, this, &MainWindow::retryCurrentNodeWithAi);
 }
 
@@ -728,8 +578,19 @@ void MainWindow::openSettings()
 
     if (m_context) {
         m_context->aiClient().reloadFromEnvironment();
-        m_context->session().setStatusMessage(tr("AI settings saved."));
-        m_context->session().appendLogLine(tr("[settings] AI provider configuration updated"));
+        m_context->session().setStatusMessage(tr("Settings saved."));
+        m_context->session().appendLogLine(tr("[settings] application settings updated"));
+    }
+
+    if (dialog.restartRequired()) {
+        if (AppSettings::restartApplication()) {
+            QCoreApplication::quit();
+            return;
+        }
+
+        QMessageBox::warning(this,
+                             tr("Language Restart Required"),
+                             tr("The language setting was saved, but the application could not be restarted automatically. Please restart it manually."));
     }
 }
 
@@ -899,11 +760,11 @@ void MainWindow::updateNodeDetails(QTreeWidgetItem *current, QTreeWidgetItem *pr
     metadata += tr("Status: %1\n").arg(node->statusText());
     metadata += tr("Source File: %1\n").arg(node->sourceFile);
     metadata += tr("First Line: %1\n").arg(node->firstLine >= 0 ? QString::number(node->firstLine) : QStringLiteral("-"));
-    metadata += tr("co_names: %1\n").arg(joinOrDash(node->coNames));
-    metadata += tr("co_varnames: %1\n").arg(joinOrDash(node->coVarNames));
-    metadata += tr("co_freevars: %1\n").arg(joinOrDash(node->coFreeVars));
-    metadata += tr("co_cellvars: %1\n").arg(joinOrDash(node->coCellVars));
-    metadata += tr("co_consts: %1\n").arg(joinOrDash(node->coConstsPreview));
+    appendMetadataList(metadata, tr("co_names"), node->coNames);
+    appendMetadataList(metadata, tr("Locals+Names"), node->coVarNames);
+    appendMetadataList(metadata, tr("Free Vars"), node->coFreeVars, true);
+    appendMetadataList(metadata, tr("Cell Vars"), node->coCellVars, true);
+    appendMetadataList(metadata, tr("co_consts"), node->coConstsPreview);
     if (!node->nativeError.trimmed().isEmpty()) {
         metadata += tr("\nNative Error:\n%1").arg(node->nativeError);
     }

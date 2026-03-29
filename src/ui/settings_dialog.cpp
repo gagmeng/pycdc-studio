@@ -1,22 +1,25 @@
 #include "src/ui/settings_dialog.h"
 
+#include <QComboBox>
 #include <QDialogButtonBox>
 #include <QFrame>
 #include <QFormLayout>
 #include <QHBoxLayout>
 #include <QLabel>
 #include <QLineEdit>
-#include <QPlainTextEdit>
 #include <QPushButton>
+#include <QPlainTextEdit>
 #include <QVBoxLayout>
 
 #include "src/ai/ai_provider_config.h"
+#include "src/app/app_settings.h"
 #include "src/ui/lucide_icon_factory.h"
 
 SettingsDialog::SettingsDialog(QWidget *parent)
     : QDialog(parent)
 {
-    setWindowTitle(tr("AI Settings"));
+    setObjectName(QStringLiteral("settingsDialog"));
+    setWindowTitle(tr("Settings"));
     setWindowIcon(LucideIconFactory::icon(LucideIconFactory::IconType::Settings, QColor("#1b3b5d"), 20));
     resize(640, 450);
 
@@ -39,10 +42,10 @@ SettingsDialog::SettingsDialog(QWidget *parent)
     auto *titleLayout = new QVBoxLayout();
     titleLayout->setSpacing(4);
 
-    auto *titleLabel = new QLabel(tr("AI Provider Settings"), headerCard);
+    auto *titleLabel = new QLabel(tr("Application Settings"), headerCard);
     titleLabel->setObjectName(QStringLiteral("dialogTitle"));
 
-    auto *hintLabel = new QLabel(tr("Saved values override environment variables. Leave a field empty to fall back to environment configuration."), headerCard);
+    auto *hintLabel = new QLabel(tr("Saved values override environment variables. Leave a field empty to fall back to environment configuration. Language changes apply after restart."), headerCard);
     hintLabel->setObjectName(QStringLiteral("dialogHint"));
     hintLabel->setWordWrap(true);
 
@@ -72,9 +75,14 @@ SettingsDialog::SettingsDialog(QWidget *parent)
     m_modelEdit = new QLineEdit(this);
     m_modelEdit->setPlaceholderText(tr("gpt-4.1-mini / qwen-plus / ..."));
     m_systemPromptEdit = new QPlainTextEdit(this);
+    m_systemPromptEdit->setObjectName(QStringLiteral("systemPromptEdit"));
     m_systemPromptEdit->setPlaceholderText(tr("Optional custom system prompt"));
     m_systemPromptEdit->setMinimumHeight(120);
+    m_languageCombo = new QComboBox(this);
+    m_languageCombo->addItem(tr("English"), QStringLiteral("en"));
+    m_languageCombo->addItem(tr("简体中文"), QStringLiteral("zh_CN"));
 
+    formLayout->addRow(tr("Language"), m_languageCombo);
     formLayout->addRow(tr("Base URL"), m_baseUrlEdit);
     formLayout->addRow(tr("API Key"), m_apiKeyEdit);
     formLayout->addRow(tr("Model"), m_modelEdit);
@@ -85,69 +93,15 @@ SettingsDialog::SettingsDialog(QWidget *parent)
     auto *buttonBox = new QDialogButtonBox(QDialogButtonBox::Save | QDialogButtonBox::Cancel, this);
     if (QPushButton *saveButton = buttonBox->button(QDialogButtonBox::Save)) {
         saveButton->setIcon(LucideIconFactory::icon(LucideIconFactory::IconType::StatusOk, QColor("#ffffff"), 16));
+        saveButton->setObjectName(QStringLiteral("dialogPrimaryButton"));
     }
     if (QPushButton *cancelButton = buttonBox->button(QDialogButtonBox::Cancel)) {
         cancelButton->setIcon(LucideIconFactory::icon(LucideIconFactory::IconType::Exit, QColor("#5b6f86"), 16));
+        cancelButton->setObjectName(QStringLiteral("dialogSecondaryButton"));
     }
     connect(buttonBox, &QDialogButtonBox::accepted, this, &SettingsDialog::saveAndAccept);
     connect(buttonBox, &QDialogButtonBox::rejected, this, &QDialog::reject);
     layout->addWidget(buttonBox);
-
-    setStyleSheet(QStringLiteral(R"(
-        QDialog {
-            background: #eef3f8;
-        }
-        QFrame#headerCard, QFrame#formCard {
-            background: #ffffff;
-            border: 1px solid #d7e2f0;
-            border-radius: 18px;
-        }
-        QLabel#dialogIconBadge {
-            background: qlineargradient(x1:0, y1:0, x2:1, y2:1,
-                                        stop:0 #2f7cff,
-                                        stop:1 #153a74);
-            border: 1px solid rgba(255, 255, 255, 0.32);
-            border-radius: 14px;
-        }
-        QLabel#dialogTitle {
-            color: #152740;
-            font-size: 22px;
-            font-weight: 700;
-        }
-        QLabel#dialogHint, QLabel {
-            color: #5b6f86;
-        }
-        QLineEdit, QPlainTextEdit {
-            background: #fbfdff;
-            color: #17304a;
-            border: 1px solid #d7e2f0;
-            border-radius: 12px;
-            padding: 8px 10px;
-        }
-        QLineEdit:focus, QPlainTextEdit:focus {
-            border: 1px solid #8db4ff;
-        }
-        QPushButton {
-            background: #ffffff;
-            color: #1c3652;
-            border: 1px solid #d7e2f0;
-            border-radius: 10px;
-            padding: 8px 16px;
-            font-weight: 600;
-            min-width: 92px;
-        }
-        QPushButton:hover {
-            background: #eef5ff;
-        }
-        QPushButton[text='Save'] {
-            background: #1f63ff;
-            color: #ffffff;
-            border-color: #1f63ff;
-        }
-        QPushButton[text='Save']:hover {
-            background: #1857e1;
-        }
-    )"));
 
     loadValues();
 }
@@ -155,10 +109,15 @@ SettingsDialog::SettingsDialog(QWidget *parent)
 void SettingsDialog::loadValues()
 {
     const AiProviderConfig config = AiProviderConfig::load();
+    m_initialLanguage = AppSettings::language();
     m_baseUrlEdit->setText(config.baseUrl);
     m_apiKeyEdit->setText(config.apiKey);
     m_modelEdit->setText(config.model);
     m_systemPromptEdit->setPlainText(config.systemPrompt);
+    const int languageIndex = m_languageCombo->findData(m_initialLanguage);
+    if (languageIndex >= 0) {
+        m_languageCombo->setCurrentIndex(languageIndex);
+    }
 }
 
 void SettingsDialog::saveAndAccept()
@@ -169,5 +128,7 @@ void SettingsDialog::saveAndAccept()
     config.model = m_modelEdit->text().trimmed();
     config.systemPrompt = m_systemPromptEdit->toPlainText().trimmed();
     config.save();
+    AppSettings::setLanguage(m_languageCombo->currentData().toString());
+    m_restartRequired = m_languageCombo->currentData().toString() != m_initialLanguage;
     accept();
 }
