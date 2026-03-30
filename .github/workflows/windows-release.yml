@@ -4,23 +4,8 @@ on:
   push:
     tags:
       - "v*"
+  pull_request:
   workflow_dispatch:
-    inputs:
-      publish_release:
-        description: "Create or update a GitHub release with the built zip"
-        required: false
-        default: false
-        type: boolean
-      release_tag:
-        description: "Tag to publish when running manually (for example: v0.1.0)"
-        required: false
-        default: ""
-        type: string
-      pycdc_ref:
-        description: "Optional pycdc branch, tag, or commit to build"
-        required: false
-        default: ""
-        type: string
 
 permissions:
   contents: write
@@ -38,58 +23,54 @@ jobs:
       - name: Check out pycdc-studio
         uses: actions/checkout@v6
 
-      - name: Set up Python
-        uses: actions/setup-python@v6
+      - name: Set up MSVC
+        uses: ilammy/msvc-dev-cmd@v1
         with:
-          python-version: "3.13"
+          arch: x64
 
-      - name: Install Qt build tooling
-        shell: pwsh
-        run: |
-          python -m pip install --upgrade pip
-          python -m pip install aqtinstall
-          python -m aqt install-qt windows desktop $env:QT_VERSION $env:QT_ARCH --outputdir "$env:RUNNER_TEMP\Qt"
-          "QT_ROOT_DIR=$env:RUNNER_TEMP\Qt\$env:QT_VERSION\$env:QT_ARCH" | Out-File -FilePath $env:GITHUB_ENV -Append -Encoding utf8
+      - name: Install Qt 6.8.3
+        uses: jurplel/install-qt-action@v4
+        with:
+          version: ${{ env.QT_VERSION }}
+          host: windows
+          target: desktop
+          arch: ${{ env.QT_ARCH }}
+          cache: true
 
       - name: Clone official pycdc
         id: pycdc_checkout
         shell: pwsh
         run: |
           git clone --depth 1 $env:PYCDC_REPO external\pycdc
-          $requestedRef = '${{ github.event.inputs.pycdc_ref }}'.Trim()
-          if (-not [string]::IsNullOrWhiteSpace($requestedRef)) {
-            git -C external\pycdc fetch --depth 1 origin $requestedRef
-            git -C external\pycdc checkout FETCH_HEAD
-          }
           $pycdcCommit = (git -C external\pycdc rev-parse HEAD).Trim()
           "pycdc_commit=$pycdcCommit" | Out-File -FilePath $env:GITHUB_OUTPUT -Append -Encoding utf8
 
       - name: Configure pycdc-studio
         shell: pwsh
         run: |
-          cmake -S . -B build\studio -G "Visual Studio 17 2022" -A x64 -DCMAKE_PREFIX_PATH="$env:QT_ROOT_DIR"
+          cmake -S . -B build\studio -G Ninja -DCMAKE_BUILD_TYPE=Release -DCMAKE_PREFIX_PATH="$env:QT_ROOT_DIR"
 
       - name: Build pycdc-studio
         shell: pwsh
         run: |
-          cmake --build build\studio --config Release
-          cmake --install build\studio --config Release --prefix build\package
+          cmake --build build\studio --parallel
+          cmake --install build\studio --prefix build\package
 
       - name: Configure pycdc
         shell: pwsh
         run: |
-          cmake -S external\pycdc -B build\pycdc -G "Visual Studio 17 2022" -A x64
+          cmake -S external\pycdc -B build\pycdc -G Ninja -DCMAKE_BUILD_TYPE=Release
 
       - name: Build pycdc and pycdas
         shell: pwsh
         run: |
-          cmake --build build\pycdc --config Release --target pycdc pycdas
+          cmake --build build\pycdc --target pycdc pycdas --parallel
 
       - name: Assemble release package
         id: package
         shell: pwsh
         run: |
-          $releaseTag = if ($env:GITHUB_REF -like 'refs/tags/*') { $env:GITHUB_REF_NAME } elseif (-not [string]::IsNullOrWhiteSpace('${{ github.event.inputs.release_tag }}')) { '${{ github.event.inputs.release_tag }}'.Trim() } else { 'dev-' + $env:GITHUB_RUN_NUMBER }
+          $releaseTag = if ($env:GITHUB_REF -like 'refs/tags/*') { $env:GITHUB_REF_NAME } else { 'dev-' + $env:GITHUB_RUN_NUMBER }
           $packageName = "pycdc-studio-$releaseTag-windows-x64"
           $packageRoot = Join-Path $env:RUNNER_TEMP $packageName
           $binDir = Join-Path $packageRoot "bin"
@@ -101,8 +82,8 @@ jobs:
 
           New-Item -ItemType Directory -Force -Path $binDir | Out-Null
           Copy-Item -Recurse -Force build\package\* $packageRoot
-          Copy-Item -Force build\pycdc\Release\pycdc.exe $binDir
-          Copy-Item -Force build\pycdc\Release\pycdas.exe $binDir
+          Copy-Item -Force build\pycdc\pycdc.exe $binDir
+          Copy-Item -Force build\pycdc\pycdas.exe $binDir
           Copy-Item -Force external\pycdc\LICENSE (Join-Path $packageRoot "LICENSE.pycdc.txt")
           Copy-Item -Force README.md (Join-Path $packageRoot "README.md")
           if (Test-Path README_CN.md) {
@@ -138,18 +119,8 @@ jobs:
           if-no-files-found: error
 
       - name: Publish GitHub release
-        if: startsWith(github.ref, 'refs/tags/') || github.event.inputs.publish_release == 'true'
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        shell: pwsh
-        run: |
-          gh --version
-          $tag = '${{ steps.package.outputs.release_tag }}'
-          $zipPath = '${{ steps.package.outputs.zip_path }}'
-
-          gh release view $tag *> $null
-          if ($LASTEXITCODE -eq 0) {
-            gh release upload $tag $zipPath --clobber
-          } else {
-            gh release create $tag $zipPath --target $env:GITHUB_SHA --generate-notes --title $tag
-          }
+        if: startsWith(github.ref, 'refs/tags/v')
+        uses: softprops/action-gh-release@v2
+        with:
+          files: ${{ steps.package.outputs.zip_path }}
+          generate_release_notes: true

@@ -57,7 +57,7 @@ You can override them with environment variables:
 The repository includes a GitHub Actions workflow that:
 
 - installs Qt on `windows-latest`
-- installs the required Python tooling inline in the workflow, without relying on `requirements.txt` or `pyproject.toml`
+- prepares the MSVC toolchain and installs Qt with `jurplel/install-qt-action`
 - clones the official upstream `pycdc` repository
 - builds `pycdc-studio`, `pycdc`, and `pycdas`
 - bundles everything into a Windows zip package
