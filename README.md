@@ -8,15 +8,11 @@ A Qt Widgets desktop UI for exploring Python bytecode with `pycdc` / `pycdas`, i
 
 ### Main workspace
 
-![Main workspace](./docs/images/main-workspace.png)
-
-### Settings
-
-![Settings dialog](./docs/images/settings-dialog.png)
+![Main workspace](./docs/images/main-workspace-en.png)
 
 ### AI fallback
 
-![AI fallback reconstruction](./docs/images/ai-fallback.png)
+![AI fallback reconstruction](./docs/images/ai-fallback-en.png)
 
 ## What it does
 

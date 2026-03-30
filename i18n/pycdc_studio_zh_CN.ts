@@ -151,5 +151,7 @@ Native Error:
     <message><source>System Prompt</source><translation>System Prompt</translation></message>
     <message><source>English</source><translation>English</translation></message>
     <message><source>简体中文</source><translation>简体中文</translation></message>
+    <message><source>Save</source><translation>保存</translation></message>
+    <message><source>Cancel</source><translation>取消</translation></message>
 </context>
 </TS>

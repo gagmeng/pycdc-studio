@@ -92,11 +92,11 @@ SettingsDialog::SettingsDialog(QWidget *parent)
 
     auto *buttonBox = new QDialogButtonBox(QDialogButtonBox::Save | QDialogButtonBox::Cancel, this);
     if (QPushButton *saveButton = buttonBox->button(QDialogButtonBox::Save)) {
-        saveButton->setIcon(LucideIconFactory::icon(LucideIconFactory::IconType::StatusOk, QColor("#ffffff"), 16));
+        saveButton->setText(tr("Save"));
         saveButton->setObjectName(QStringLiteral("dialogPrimaryButton"));
     }
     if (QPushButton *cancelButton = buttonBox->button(QDialogButtonBox::Cancel)) {
-        cancelButton->setIcon(LucideIconFactory::icon(LucideIconFactory::IconType::Exit, QColor("#5b6f86"), 16));
+        cancelButton->setText(tr("Cancel"));
         cancelButton->setObjectName(QStringLiteral("dialogSecondaryButton"));
     }
     connect(buttonBox, &QDialogButtonBox::accepted, this, &SettingsDialog::saveAndAccept);
