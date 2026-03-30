@@ -65,6 +65,14 @@ The repository includes a GitHub Actions workflow that:
 
 ## AI configuration
 
+Before using AI fallback, open `Settings` and configure at least:
+
+- `Base URL`
+- `API Key`
+- `Model`
+
+The current client expects an **OpenAI-compatible API** endpoint.
+
 The settings dialog stores provider configuration with `QSettings` and falls back to environment variables when a field is empty.
 
 Supported environment variables:
@@ -94,7 +102,7 @@ cmake --build build
 
 1. Launch `pycdc-studio`
 2. Open a `.pyc` / `.pyo` file, or drag a folder into the window
-3. Open `Settings` from the top-level menu if you need to configure AI provider details
+3. Open `Settings` from the top-level menu and configure your AI model if you want to use AI fallback
 4. Select a file or code object in the tree
 5. Inspect native output, disassembly, metadata, and prompt context
 6. Use `Retry with AI` on the selected node if native decompilation is incomplete or wrong

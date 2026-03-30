@@ -69,6 +69,14 @@
 
 ## AI 配置
 
+在使用 AI fallback 之前，需要先在 `设置` 中至少配置：
+
+- `Base URL`
+- `API Key`
+- `Model`
+
+当前接入的是 **兼容 OpenAI 的 API**。
+
 设置页会通过 `QSettings` 保存 AI 配置。  
 如果某个字段为空，则回退到环境变量。
 
@@ -99,7 +107,7 @@ cmake --build build
 
 1. 启动 `pycdc-studio`
 2. 打开一个 `.pyc` / `.pyo`，或者直接把文件夹拖进窗口
-3. 如果需要配置 AI 服务，可通过菜单栏顶层的 `设置` 打开设置页
+3. 如果要使用 AI fallback，请先通过菜单栏顶层的 `设置` 配置 AI 模型
 4. 在左侧树中选择文件或某个 code object
 5. 查看 native 结果、反汇编、元数据和 prompt
 6. 当原生反编译不完整或不正确时，对当前节点点击 `Retry with AI`
