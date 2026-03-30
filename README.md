@@ -143,7 +143,6 @@ This project integrates with `pycdc` / `pycdas`, whose upstream project is licen
 - `pycdc`: GPL-3.0
 - release packages that bundle `pycdc` / `pycdas` should include the GPL-3.0 notice
 - release packages also record the bundled upstream `pycdc` repository and commit in `THIRD_PARTY_NOTICES.txt`
-- the release workflow does not bundle a separate source archive; it records the exact upstream source location and commit instead
 
 See the upstream project for full license details:
 - [zrax/pycdc](https://github.com/zrax/pycdc)

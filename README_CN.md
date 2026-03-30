@@ -149,7 +149,6 @@ python test/compile_test_samples.py
 - `pycdc`：GPL-3.0
 - 如果和 `pycdc` / `pycdas` 一起分发，应同时附带对应的 GPL-3.0 许可证说明
 - 当前 release workflow 会在 `THIRD_PARTY_NOTICES.txt` 中记录打包所使用的 `pycdc` 上游仓库和 commit
-- 当前 release workflow 不会额外打单独源码包，而是记录精确的上游源码位置和 commit
 
 上游项目地址：
 - [zrax/pycdc](https://github.com/zrax/pycdc)
