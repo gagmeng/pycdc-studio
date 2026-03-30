@@ -57,7 +57,7 @@
     <message><source>File</source><translation>文件</translation></message>
     <message><source>Open .pyc...</source><translation>打开 .pyc...</translation></message>
     <message><source>Save Merged Result...</source><translation>保存合并结果...</translation></message>
-    <message><source>Settings...</source><translation>设置...</translation></message>
+    <message><source>Settings</source><translation>设置</translation></message>
     <message><source>Exit</source><translation>退出</translation></message>
     <message><source>No .pyc or .pyo files were found in the dropped selection.</source><translation>拖入内容中没有找到 .pyc 或 .pyo 文件。</translation></message>
     <message><source>[drop] no supported bytecode files found</source><translation>[drop] 未找到支持的字节码文件</translation></message>

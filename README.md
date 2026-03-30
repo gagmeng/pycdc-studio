@@ -40,15 +40,28 @@ That keeps fallback reconstruction focused on the selected node instead of the w
 
 ## pycdc integration
 
-The app currently prefers local executables and will look for:
+The app currently prefers local executables next to the application binary and will look for:
 
-- `D:/code/pycdc/Release/pycdc.exe`
-- `D:/code/pycdc/Release/pycdas.exe`
+- `pycdc.exe`
+- `pycdas.exe`
+
+in the same directory as `pycdc-studio.exe`.
 
 You can override them with environment variables:
 
 - `PYCDC_STUDIO_PYCDC`
 - `PYCDC_STUDIO_PYCDAS`
+
+## Windows release workflow
+
+The repository includes a GitHub Actions workflow that:
+
+- installs Qt on `windows-latest`
+- clones the official upstream `pycdc` repository
+- builds `pycdc-studio`, `pycdc`, and `pycdas`
+- bundles everything into a Windows zip package
+- writes the bundled `pycdc` upstream repository and commit into `THIRD_PARTY_NOTICES.txt`
+- publishes the Windows zip to GitHub Releases for pushed `v*` tags
 
 ## AI configuration
 
@@ -81,9 +94,10 @@ cmake --build build
 
 1. Launch `pycdc-studio`
 2. Open a `.pyc` / `.pyo` file, or drag a folder into the window
-3. Select a file or code object in the tree
-4. Inspect native output, disassembly, metadata, and prompt context
-5. Use `Retry with AI` on the selected node if native decompilation is incomplete or wrong
+3. Open `Settings` from the top-level menu if you need to configure AI provider details
+4. Select a file or code object in the tree
+5. Inspect native output, disassembly, metadata, and prompt context
+6. Use `Retry with AI` on the selected node if native decompilation is incomplete or wrong
 
 ## Test samples
 
@@ -94,7 +108,15 @@ Longer test cases are included under `test/`:
 - `plugin_config_resolver.py`
 - plus several smaller samples
 
-Compiled bytecode samples are generated under `test/__pycache__/` for drag-and-drop testing.
+The repository tracks the **source** samples only.
+
+To generate local `.pyc` files for drag-and-drop testing:
+
+```bash
+python test/compile_test_samples.py
+```
+
+That script writes the compiled bytecode into `test/__pycache__/`.
 
 ## Notes
 
@@ -111,7 +133,9 @@ It is not yet a full inline source merger.
 This project integrates with `pycdc` / `pycdas`, whose upstream project is licensed under **GPL-3.0**.
 
 - `pycdc`: GPL-3.0
-- This repository should be distributed with the corresponding GPL-3.0 notice when bundled with `pycdc` / `pycdas`
+- release packages that bundle `pycdc` / `pycdas` should include the GPL-3.0 notice
+- release packages also record the bundled upstream `pycdc` repository and commit in `THIRD_PARTY_NOTICES.txt`
+- the release workflow does not bundle a separate source archive; it records the exact upstream source location and commit instead
 
 See the upstream project for full license details:
 - [zrax/pycdc](https://github.com/zrax/pycdc)

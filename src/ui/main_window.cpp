@@ -467,8 +467,7 @@ void MainWindow::buildMenus()
                                              tr("Save Merged Result..."));
     m_saveMergedAction->setShortcut(QKeySequence::SaveAs);
 
-    m_settingsAction = fileMenu->addAction(LucideIconFactory::icon(LucideIconFactory::IconType::Settings, QColor("#5b6cff")),
-                                           tr("Settings..."));
+    m_settingsAction = menuBar()->addAction(tr("Settings"));
     m_settingsAction->setShortcut(QKeySequence::Preferences);
 
     fileMenu->addSeparator();

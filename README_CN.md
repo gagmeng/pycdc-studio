@@ -44,15 +44,28 @@
 
 ## pycdc 集成方式
 
-当前会优先查找本地可执行文件：
+当前会优先查找和程序本体放在同一目录下的可执行文件：
 
-- `D:/code/pycdc/Release/pycdc.exe`
-- `D:/code/pycdc/Release/pycdas.exe`
+- `pycdc.exe`
+- `pycdas.exe`
+
+也就是 `pycdc-studio.exe` 所在目录。
 
 也可以用环境变量覆盖：
 
 - `PYCDC_STUDIO_PYCDC`
 - `PYCDC_STUDIO_PYCDAS`
+
+## Windows 发布工作流
+
+仓库里已经带了一份 GitHub Actions workflow，会自动：
+
+- 在 `windows-latest` 上安装 Qt
+- 拉取官方上游 `pycdc` 仓库
+- 编译 `pycdc-studio`、`pycdc` 和 `pycdas`
+- 打包成 Windows zip
+- 在 `THIRD_PARTY_NOTICES.txt` 里写入当前打包使用的 `pycdc` 上游仓库和 commit
+- 在推送 `v*` tag 时把 Windows zip 自动发布到 GitHub Releases
 
 ## AI 配置
 
@@ -86,9 +99,10 @@ cmake --build build
 
 1. 启动 `pycdc-studio`
 2. 打开一个 `.pyc` / `.pyo`，或者直接把文件夹拖进窗口
-3. 在左侧树中选择文件或某个 code object
-4. 查看 native 结果、反汇编、元数据和 prompt
-5. 当原生反编译不完整或不正确时，对当前节点点击 `Retry with AI`
+3. 如果需要配置 AI 服务，可通过菜单栏顶层的 `设置` 打开设置页
+4. 在左侧树中选择文件或某个 code object
+5. 查看 native 结果、反汇编、元数据和 prompt
+6. 当原生反编译不完整或不正确时，对当前节点点击 `Retry with AI`
 
 ## 测试样例
 
@@ -99,7 +113,15 @@ cmake --build build
 - `plugin_config_resolver.py`
 - 以及其他较小的样例
 
-编译后的 `.pyc` 在 `test/__pycache__/` 里，可以直接拿来拖拽测试。
+仓库里默认只跟踪这些 **源码样例**。
+
+如果你要生成本地拖拽测试用的 `.pyc`，可以运行：
+
+```bash
+python test/compile_test_samples.py
+```
+
+生成结果会写到 `test/__pycache__/`。
 
 ## 说明
 
@@ -117,7 +139,9 @@ cmake --build build
 这个项目会配合 `pycdc` / `pycdas` 使用，而它们的上游项目采用 **GPL-3.0** 许可证。
 
 - `pycdc`：GPL-3.0
-- 如果和 `pycdc` / `pycdas` 一起分发，建议同时附带对应的 GPL-3.0 许可证说明
+- 如果和 `pycdc` / `pycdas` 一起分发，应同时附带对应的 GPL-3.0 许可证说明
+- 当前 release workflow 会在 `THIRD_PARTY_NOTICES.txt` 中记录打包所使用的 `pycdc` 上游仓库和 commit
+- 当前 release workflow 不会额外打单独源码包，而是记录精确的上游源码位置和 commit
 
 上游项目地址：
 - [zrax/pycdc](https://github.com/zrax/pycdc)
