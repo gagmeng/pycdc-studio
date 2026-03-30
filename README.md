@@ -4,6 +4,20 @@
 
 A Qt Widgets desktop UI for exploring Python bytecode with `pycdc` / `pycdas`, inspecting native decompilation results, and retrying unsupported code objects with AI fallback.
 
+## Screenshots
+
+### Main workspace
+
+![Main workspace](./docs/images/main-workspace.png)
+
+### Settings
+
+![Settings dialog](./docs/images/settings-dialog.png)
+
+### AI fallback
+
+![AI fallback reconstruction](./docs/images/ai-fallback.png)
+
 ## What it does
 
 - Open `.pyc` / `.pyo` files directly

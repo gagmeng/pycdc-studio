@@ -4,6 +4,20 @@
 
 一个基于 Qt Widgets 的桌面图形界面，用来配合 `pycdc` / `pycdas` 浏览 Python 字节码、查看原生反编译结果，并在遇到不支持的 code object 时使用 AI 做兜底重建。
 
+## 界面预览
+
+### 主工作区
+
+![主工作区](./docs/images/main-workspace.png)
+
+### 设置页
+
+![设置页](./docs/images/settings-dialog.png)
+
+### AI 重建
+
+![AI 重建效果](./docs/images/ai-fallback.png)
+
 ## 功能
 
 - 直接打开 `.pyc` / `.pyo`
