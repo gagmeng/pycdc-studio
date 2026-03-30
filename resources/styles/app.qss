@@ -55,6 +55,17 @@ QPushButton#primaryActionButton {
     min-width: 180px;
 }
 
+QPushButton#secondaryActionButton {
+    background: rgba(255, 255, 255, 0.94);
+    color: #1c3652;
+    border: 1px solid #d7e2f0;
+    border-radius: 14px;
+    padding: 10px 16px;
+    font-size: 13px;
+    font-weight: 700;
+    min-width: 150px;
+}
+
 QPushButton#primaryActionButton:hover,
 QPushButton#dialogPrimaryButton:hover {
     background: qlineargradient(x1:0, y1:0, x2:1, y2:1,
@@ -65,6 +76,15 @@ QPushButton#dialogPrimaryButton:hover {
 QPushButton#primaryActionButton:pressed,
 QPushButton#dialogPrimaryButton:pressed {
     background: #214cd0;
+}
+
+QPushButton#secondaryActionButton:hover {
+    background: #eef5ff;
+    border-color: #c9dcff;
+}
+
+QPushButton#secondaryActionButton:pressed {
+    background: #e2ecff;
 }
 
 QPushButton#dialogSecondaryButton {

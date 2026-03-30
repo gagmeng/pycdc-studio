@@ -33,7 +33,9 @@
     <message><source>pycdc-studio</source><translation>pycdc-studio</translation></message>
     <message><source>A desktop workspace for Python bytecode analysis, native decompilation, and AI-assisted fallback reconstruction.</source><translation>一个用于 Python 字节码分析、原生反编译与 AI 兜底重建的桌面工作区。</translation></message>
     <message><source>Retry with AI</source><translation>使用 AI 重试</translation></message>
+    <message><source>Save Merged</source><translation>保存合并结果</translation></message>
     <message><source>Send the currently selected code object to AI fallback reconstruction</source><translation>将当前选中的 code object 发送给 AI 进行兜底重建</translation></message>
+    <message><source>Save the merged result for the currently selected file</source><translation>保存当前所选文件的合并结果</translation></message>
     <message><source>Works on the selected function, method, class body, or module node.</source><translation>可作用于当前选中的函数、方法、类体或模块节点。</translation></message>
     <message><source>Drop bytecode or a folder</source><translation>拖入字节码文件或文件夹</translation></message>
     <message><source>Drag .pyc/.pyo files or a folder. Directories are scanned recursively for supported bytecode.</source><translation>可拖入 .pyc/.pyo 文件或文件夹。目录会递归扫描支持的字节码文件。</translation></message>
@@ -54,6 +56,7 @@
     <message><source>Ready</source><translation>就绪</translation></message>
     <message><source>File</source><translation>文件</translation></message>
     <message><source>Open .pyc...</source><translation>打开 .pyc...</translation></message>
+    <message><source>Save Merged Result...</source><translation>保存合并结果...</translation></message>
     <message><source>Settings...</source><translation>设置...</translation></message>
     <message><source>Exit</source><translation>退出</translation></message>
     <message><source>No .pyc or .pyo files were found in the dropped selection.</source><translation>拖入内容中没有找到 .pyc 或 .pyo 文件。</translation></message>
@@ -64,6 +67,12 @@
     <message><source>[drop] ... and %1 more</source><translation>[drop] ... 以及另外 %1 个</translation></message>
     <message><source>Unable to open the dropped bytecode selection.</source><translation>无法打开拖入的字节码内容。</translation></message>
     <message><source>Open Python Bytecode</source><translation>打开 Python 字节码</translation></message>
+    <message><source>There is no merged result to save.</source><translation>当前没有可保存的合并结果。</translation></message>
+    <message><source>Save Merged Result</source><translation>保存合并结果</translation></message>
+    <message><source>Python Source (*.py);;Text Files (*.txt);;All Files (*)</source><translation>Python 源码 (*.py);;文本文件 (*.txt);;所有文件 (*)</translation></message>
+    <message><source>Unable to save the merged result to %1.</source><translation>无法将合并结果保存到 %1。</translation></message>
+    <message><source>Saved merged result to %1</source><translation>已将合并结果保存到 %1</translation></message>
+    <message><source>[save] merged result written to %1</source><translation>[save] 已将合并结果写入 %1</translation></message>
     <message><source>Python Bytecode (*.pyc *.pyo);;All Files (*)</source><translation>Python 字节码 (*.pyc *.pyo);;所有文件 (*)</translation></message>
     <message><source>Settings saved.</source><translation>设置已保存。</translation></message>
     <message><source>[settings] application settings updated</source><translation>[settings] 应用设置已更新</translation></message>

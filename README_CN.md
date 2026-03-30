@@ -111,3 +111,13 @@ cmake --build build
 - AI 重建部分会以 patch 的形式附加在后面
 
 它目前**还不是**真正的 inline source merger。
+
+## 许可证
+
+这个项目会配合 `pycdc` / `pycdas` 使用，而它们的上游项目采用 **GPL-3.0** 许可证。
+
+- `pycdc`：GPL-3.0
+- 如果和 `pycdc` / `pycdas` 一起分发，建议同时附带对应的 GPL-3.0 许可证说明
+
+上游项目地址：
+- [zrax/pycdc](https://github.com/zrax/pycdc)

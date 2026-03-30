@@ -21,6 +21,7 @@
 #include <QPlainTextEdit>
 #include <QPushButton>
 #include <QSet>
+#include <QSaveFile>
 #include <QSize>
 #include <QSplitter>
 #include <QStatusBar>
@@ -307,6 +308,9 @@ void MainWindow::buildUi()
     heroActions->setSpacing(8);
     heroActions->setAlignment(Qt::AlignTop);
 
+    auto *heroActionRow = new QHBoxLayout();
+    heroActionRow->setSpacing(10);
+
     auto *retryButton = new QPushButton(LucideIconFactory::icon(LucideIconFactory::IconType::Sparkles, QColor("#ffffff"), 18),
                                         tr("Retry with AI"),
                                         heroCard);
@@ -315,11 +319,21 @@ void MainWindow::buildUi()
     retryButton->setMinimumHeight(42);
     retryButton->setToolTip(tr("Send the currently selected code object to AI fallback reconstruction"));
 
+    auto *saveMergedButton = new QPushButton(LucideIconFactory::icon(LucideIconFactory::IconType::Merged, QColor("#245ba7"), 18),
+                                             tr("Save Merged"),
+                                             heroCard);
+    saveMergedButton->setObjectName(QStringLiteral("secondaryActionButton"));
+    saveMergedButton->setCursor(Qt::PointingHandCursor);
+    saveMergedButton->setMinimumHeight(42);
+    saveMergedButton->setToolTip(tr("Save the merged result for the currently selected file"));
+
     auto *retryHint = new QLabel(tr("Works on the selected function, method, class body, or module node."), heroCard);
     retryHint->setObjectName(QStringLiteral("heroActionHint"));
     retryHint->setWordWrap(true);
 
-    heroActions->addWidget(retryButton);
+    heroActionRow->addWidget(retryButton);
+    heroActionRow->addWidget(saveMergedButton);
+    heroActions->addLayout(heroActionRow);
     heroActions->addWidget(retryHint);
     heroTop->addLayout(heroActions, 0);
     heroLayout->addLayout(heroTop);
@@ -438,6 +452,7 @@ void MainWindow::buildUi()
     statusBar()->showMessage(tr("Ready"));
 
     connect(retryButton, &QPushButton::clicked, this, &MainWindow::retryCurrentNodeWithAi);
+    connect(saveMergedButton, &QPushButton::clicked, this, &MainWindow::saveMergedResult);
 }
 
 void MainWindow::buildMenus()
@@ -447,6 +462,10 @@ void MainWindow::buildMenus()
     m_openAction = fileMenu->addAction(LucideIconFactory::icon(LucideIconFactory::IconType::Open, QColor("#2d6cdf")),
                                        tr("Open .pyc..."));
     m_openAction->setShortcut(QKeySequence::Open);
+
+    m_saveMergedAction = fileMenu->addAction(LucideIconFactory::icon(LucideIconFactory::IconType::Merged, QColor("#245ba7")),
+                                             tr("Save Merged Result..."));
+    m_saveMergedAction->setShortcut(QKeySequence::SaveAs);
 
     m_settingsAction = fileMenu->addAction(LucideIconFactory::icon(LucideIconFactory::IconType::Settings, QColor("#5b6cff")),
                                            tr("Settings..."));
@@ -467,6 +486,7 @@ void MainWindow::buildMenus()
 void MainWindow::connectSignals()
 {
     connect(m_openAction, &QAction::triggered, this, &MainWindow::openPycFile);
+    connect(m_saveMergedAction, &QAction::triggered, this, &MainWindow::saveMergedResult);
     connect(m_settingsAction, &QAction::triggered, this, &MainWindow::openSettings);
     connect(m_retryAiAction, &QAction::triggered, this, &MainWindow::retryCurrentNodeWithAi);
     connect(m_exitAction, &QAction::triggered, this, &QWidget::close);
@@ -555,6 +575,81 @@ void MainWindow::openPycFile()
     }
 
     openPycFileFromPath(filePath);
+}
+
+void MainWindow::saveMergedResult()
+{
+    if (!m_context) {
+        return;
+    }
+
+    const ProjectSession &session = m_context->session();
+    const QString currentNodeId = m_treeWidget && m_treeWidget->currentItem()
+        ? m_treeWidget->currentItem()->data(0, kNodeIdRole).toString()
+        : QString();
+    const CodeObjectNode *rootNode = currentNodeId.isEmpty()
+        ? nullptr
+        : findRootNodeForSelection(session.codeObjectTree(), currentNodeId);
+
+    QString mergedText;
+    QString suggestedBaseName = QStringLiteral("merged_output");
+    QString suggestedDirectory = QDir::homePath();
+
+    if (rootNode) {
+        mergedText = buildMergedTextForRoot(*rootNode).trimmed();
+        QFileInfo sourceInfo(rootNode->sourceFile);
+        if (!sourceInfo.completeBaseName().isEmpty()) {
+            suggestedBaseName = sourceInfo.completeBaseName() + QStringLiteral("_merged");
+        } else if (!rootNode->displayName.isEmpty()) {
+            suggestedBaseName = rootNode->displayName + QStringLiteral("_merged");
+        }
+        if (!sourceInfo.absolutePath().isEmpty() && sourceInfo.absolutePath() != QStringLiteral(".")) {
+            suggestedDirectory = sourceInfo.absolutePath();
+        }
+    } else {
+        mergedText = m_mergedEdit ? m_mergedEdit->toPlainText().trimmed() : session.mergedSource().trimmed();
+        const QFileInfo sourceInfo(session.openedFilePath());
+        if (!sourceInfo.completeBaseName().isEmpty()) {
+            suggestedBaseName = sourceInfo.completeBaseName() + QStringLiteral("_merged");
+        }
+        if (!sourceInfo.absolutePath().isEmpty() && sourceInfo.absolutePath() != QStringLiteral(".")) {
+            suggestedDirectory = sourceInfo.absolutePath();
+        }
+    }
+
+    if (mergedText.isEmpty()) {
+        m_context->session().setStatusMessage(tr("There is no merged result to save."));
+        return;
+    }
+
+    const QString suggestedPath = QDir(suggestedDirectory).filePath(suggestedBaseName + QStringLiteral(".py"));
+    const QString targetPath = QFileDialog::getSaveFileName(
+        this,
+        tr("Save Merged Result"),
+        suggestedPath,
+        tr("Python Source (*.py);;Text Files (*.txt);;All Files (*)"));
+
+    if (targetPath.isEmpty()) {
+        return;
+    }
+
+    QSaveFile outputFile(targetPath);
+    if (!outputFile.open(QIODevice::WriteOnly | QIODevice::Text)) {
+        QMessageBox::warning(this,
+                             tr("Save Merged Result"),
+                             tr("Unable to save the merged result to %1.").arg(targetPath));
+        return;
+    }
+
+    if (outputFile.write(mergedText.toUtf8()) < 0 || !outputFile.commit()) {
+        QMessageBox::warning(this,
+                             tr("Save Merged Result"),
+                             tr("Unable to save the merged result to %1.").arg(targetPath));
+        return;
+    }
+
+    m_context->session().setStatusMessage(tr("Saved merged result to %1").arg(QFileInfo(targetPath).fileName()));
+    m_context->session().appendLogLine(tr("[save] merged result written to %1").arg(targetPath));
 }
 
 bool MainWindow::openPycFileFromPath(const QString &filePath)

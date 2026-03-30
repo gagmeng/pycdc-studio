@@ -105,3 +105,13 @@ The current `Merged` view is an honest mixed document:
 - AI fallback patches appended per code object
 
 It is not yet a full inline source merger.
+
+## License
+
+This project integrates with `pycdc` / `pycdas`, whose upstream project is licensed under **GPL-3.0**.
+
+- `pycdc`: GPL-3.0
+- This repository should be distributed with the corresponding GPL-3.0 notice when bundled with `pycdc` / `pycdas`
+
+See the upstream project for full license details:
+- [zrax/pycdc](https://github.com/zrax/pycdc)
