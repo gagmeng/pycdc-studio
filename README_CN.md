@@ -61,6 +61,7 @@
 仓库里已经带了一份 GitHub Actions workflow，会自动：
 
 - 在 `windows-latest` 上安装 Qt
+- 直接在 workflow 里安装所需的 Python 工具，不依赖 `requirements.txt` 或 `pyproject.toml`
 - 拉取官方上游 `pycdc` 仓库
 - 编译 `pycdc-studio`、`pycdc` 和 `pycdas`
 - 打包成 Windows zip
