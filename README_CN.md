@@ -61,9 +61,13 @@
 当前会优先查找和程序本体放在同一目录下的可执行文件：
 
 - `pycdc.exe`
+- `pycdc`
 - `pycdas.exe`
+- `pycdas`
 
-也就是 `pycdc-studio.exe` 所在目录。
+也就是 `pycdc-studio` 程序本体所在目录。
+
+在 Linux 发布包里，这对应的是 `pycdc-studio.sh` 启动脚本背后的 `bin/` 目录。
 
 也可以用环境变量覆盖：
 
@@ -81,6 +85,22 @@
 - 打包成 Windows zip
 - 在 `THIRD_PARTY_NOTICES.txt` 里写入当前打包使用的 `pycdc` 上游仓库和 commit
 - 在推送 `v*` tag 时把 Windows zip 自动发布到 GitHub Releases
+
+## Linux 发布工作流
+
+仓库里现在也带了一份 Linux GitHub Actions workflow，会自动：
+
+- 在 `ubuntu-22.04` 上运行
+- 安装 Qt 6.8.3 和 Linux 构建依赖
+- 拉取官方上游 `pycdc` 仓库
+- 编译 `pycdc-studio`、`pycdc` 和 `pycdas`
+- 打包成 Linux `tar.gz`
+- 一起带上需要的 Qt 共享库和 `xcb` 平台插件
+- 生成 `pycdc-studio.sh` 启动脚本，并设置 `LD_LIBRARY_PATH` / `QT_PLUGIN_PATH`
+- 在 `THIRD_PARTY_NOTICES.txt` 里写入当前打包使用的 `pycdc` 上游仓库和 commit
+- 在推送 `v*` tag 时把 Linux tarball 自动发布到 GitHub Releases
+
+第一版 Linux 包主要面向 Ubuntu 一类的桌面环境，仍然默认系统里存在常见的 X11 / OpenGL 运行库。
 
 ## AI 配置
 

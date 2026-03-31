@@ -7,7 +7,7 @@
 
 namespace {
 QString chooseProgramPath(const QString &envVarName,
-                         const QString &bundledExecutableName,
+                         const QStringList &bundledExecutableNames,
                          const QString &defaultProgram)
 {
     const QProcessEnvironment env = QProcessEnvironment::systemEnvironment();
@@ -18,9 +18,12 @@ QString chooseProgramPath(const QString &envVarName,
 
     const QString appDir = QCoreApplication::applicationDirPath();
     if (!appDir.isEmpty()) {
-        const QString bundledPath = QDir(appDir).filePath(bundledExecutableName);
-        if (QFileInfo::exists(bundledPath)) {
-            return bundledPath;
+        for (const QString &bundledExecutableName : bundledExecutableNames) {
+            const QString bundledPath = QDir(appDir).filePath(bundledExecutableName);
+            const QFileInfo bundledInfo(bundledPath);
+            if (bundledInfo.exists() && bundledInfo.isFile()) {
+                return bundledInfo.absoluteFilePath();
+            }
         }
     }
 
@@ -38,9 +41,11 @@ AppContext::AppContext(QObject *parent)
     , m_fallbackService(m_session, m_promptBuilder, m_aiClient, this)
 {
     m_pycdcRunner.setProgram(chooseProgramPath(QStringLiteral("PYCDC_STUDIO_PYCDC"),
-                                               QStringLiteral("pycdc.exe"),
+                                               { QStringLiteral("pycdc.exe"),
+                                                 QStringLiteral("pycdc") },
                                                QStringLiteral("pycdc")));
     m_pycdasRunner.setProgram(chooseProgramPath(QStringLiteral("PYCDC_STUDIO_PYCDAS"),
-                                                QStringLiteral("pycdas.exe"),
+                                                { QStringLiteral("pycdas.exe"),
+                                                  QStringLiteral("pycdas") },
                                                 QStringLiteral("pycdas")));
 }
