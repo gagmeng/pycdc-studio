@@ -23,6 +23,11 @@ jobs:
       - name: Check out pycdc-studio
         uses: actions/checkout@v6
 
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
       - name: Install Linux build dependencies
         run: |
           sudo apt-get update
@@ -35,14 +40,22 @@ jobs:
             libxkbcommon-x11-0 \
             ninja-build
 
-      - name: Install Qt 6.8.3
-        uses: jurplel/install-qt-action@v4
-        with:
-          version: ${{ env.QT_VERSION }}
-          host: linux
-          target: desktop
-          arch: ${{ env.QT_ARCH }}
-          cache: true
+      - name: Install Qt 6.8.3 with aqt
+        shell: bash
+        run: |
+          set -euo pipefail
+          python -m pip install --upgrade pip
+          python -m pip install "aqtinstall==3.3.0"
+          python -m aqt version
+          python -m aqt install-qt linux desktop "$QT_VERSION" "$QT_ARCH" --outputdir "$GITHUB_WORKSPACE/Qt"
+
+          qt_root_dir="$GITHUB_WORKSPACE/Qt/$QT_VERSION/$QT_ARCH"
+          if [[ ! -d "$qt_root_dir" ]]; then
+            echo "Expected Qt root directory not found: $qt_root_dir" >&2
+            exit 1
+          fi
+
+          echo "QT_ROOT_DIR=$qt_root_dir" >> "$GITHUB_ENV"
 
       - name: Clone official pycdc
         id: pycdc_checkout
