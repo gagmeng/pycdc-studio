@@ -4,6 +4,8 @@
 
 A Qt Widgets desktop UI for exploring Python bytecode with `pycdc` / `pycdas`, inspecting native decompilation results, and retrying unsupported code objects with AI fallback.
 
+The app supports both Windows and Linux desktop environments.
+
 ## Screenshots
 
 ### Main workspace
@@ -59,40 +61,10 @@ The app currently prefers local executables next to the application binary and w
 
 in the same directory as the `pycdc-studio` application binary.
 
-In the Linux release bundle, that means the `bin/` directory behind the `pycdc-studio.sh` launcher script.
-
 You can override them with environment variables:
 
 - `PYCDC_STUDIO_PYCDC`
 - `PYCDC_STUDIO_PYCDAS`
-
-## Windows release workflow
-
-The repository includes a GitHub Actions workflow that:
-
-- installs Qt on `windows-latest`
-- prepares the MSVC toolchain and installs Qt with `jurplel/install-qt-action`
-- clones the official upstream `pycdc` repository
-- builds `pycdc-studio`, `pycdc`, and `pycdas`
-- bundles everything into a Windows zip package
-- writes the bundled `pycdc` upstream repository and commit into `THIRD_PARTY_NOTICES.txt`
-- publishes the Windows zip to GitHub Releases for pushed `v*` tags
-
-## Linux release workflow
-
-The repository now also includes a GitHub Actions workflow that:
-
-- runs on `ubuntu-22.04`
-- installs Qt 6 for Linux together with the required build dependencies
-- clones the official upstream `pycdc` repository
-- builds `pycdc-studio`, `pycdc`, and `pycdas`
-- assembles a Linux `tar.gz` package
-- bundles the required Qt shared libraries and the `xcb` platform plugin
-- adds a `pycdc-studio.sh` launcher that sets `LD_LIBRARY_PATH` and `QT_PLUGIN_PATH`
-- writes the bundled `pycdc` upstream repository and commit into `THIRD_PARTY_NOTICES.txt`
-- publishes the Linux tarball to GitHub Releases for pushed `v*` tags
-
-The first Linux package targets Ubuntu-style desktop environments and still expects common system runtime libraries such as X11 / OpenGL components to be present.
 
 ## AI configuration
 
