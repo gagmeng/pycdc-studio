@@ -91,7 +91,7 @@
 仓库里现在也带了一份 Linux GitHub Actions workflow，会自动：
 
 - 在 `ubuntu-22.04` 上运行
-- 安装 Qt 6.8.3 和 Linux 构建依赖
+- 安装 Linux 用的 Qt 6 和所需构建依赖
 - 拉取官方上游 `pycdc` 仓库
 - 编译 `pycdc-studio`、`pycdc` 和 `pycdas`
 - 打包成 Linux `tar.gz`

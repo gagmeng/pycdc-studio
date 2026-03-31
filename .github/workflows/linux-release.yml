@@ -15,8 +15,8 @@ jobs:
     runs-on: ubuntu-22.04
 
     env:
-      QT_VERSION: 6.8.3
-      QT_ARCH: gcc_64
+      QT_VERSION: 6.8.2
+      QT_ARCH: linux_gcc_64
       PYCDC_REPO: https://github.com/zrax/pycdc.git
 
     steps:
@@ -40,20 +40,23 @@ jobs:
             libxkbcommon-x11-0 \
             ninja-build
 
-      - name: Install Qt 6.8.3 with aqt
+      - name: Install Qt with aqt
         shell: bash
         run: |
           set -euo pipefail
           python -m pip install --upgrade pip
           python -m pip install "aqtinstall==3.3.0"
           python -m aqt version
+          python -m aqt list-qt linux desktop --arch "$QT_VERSION"
           python -m aqt install-qt linux desktop "$QT_VERSION" "$QT_ARCH" --outputdir "$GITHUB_WORKSPACE/Qt"
 
-          qt_root_dir="$GITHUB_WORKSPACE/Qt/$QT_VERSION/$QT_ARCH"
-          if [[ ! -d "$qt_root_dir" ]]; then
-            echo "Expected Qt root directory not found: $qt_root_dir" >&2
+          qt_config="$(find "$GITHUB_WORKSPACE/Qt" -path '*/lib/cmake/Qt6/Qt6Config.cmake' -print -quit)"
+          if [[ -z "$qt_config" ]]; then
+            echo "Unable to locate Qt6Config.cmake after Qt installation." >&2
             exit 1
           fi
+
+          qt_root_dir="$(cd "$(dirname "$qt_config")/../../.." && pwd)"
 
           echo "QT_ROOT_DIR=$qt_root_dir" >> "$GITHUB_ENV"
 

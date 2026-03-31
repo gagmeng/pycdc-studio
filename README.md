@@ -83,7 +83,7 @@ The repository includes a GitHub Actions workflow that:
 The repository now also includes a GitHub Actions workflow that:
 
 - runs on `ubuntu-22.04`
-- installs Qt 6.8.3 and Linux build dependencies
+- installs Qt 6 for Linux together with the required build dependencies
 - clones the official upstream `pycdc` repository
 - builds `pycdc-studio`, `pycdc`, and `pycdas`
 - assembles a Linux `tar.gz` package
