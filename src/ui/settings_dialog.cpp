@@ -197,19 +197,21 @@ void SettingsDialog::buildProviderFormPanel(QSplitter *splitter)
     m_apiKeyEdit->setEchoMode(QLineEdit::Password);
     m_apiKeyEdit->setPlaceholderText(tr("sk-..."));
 
-    // 模型行：输入框 + 选择按钮
-    auto *modelRow = new QHBoxLayout();
-    modelRow->setSpacing(6);
+    // 模型字段：输入框占满整行，Select Models 按钮在其下方
     m_modelEdit = new QLineEdit(m_formGroup);
     m_modelEdit->setPlaceholderText(tr("gpt-4o-mini / qwen-plus / ..."));
+
+    // Select Models 按钮单独一行，左对齐
+    auto *modelBtnRow = new QHBoxLayout();
+    modelBtnRow->setSpacing(0);
     m_modelPickBtn = new QPushButton(
         LucideIconFactory::icon(LucideIconFactory::IconType::Ai, QColor("#315efb"), 15),
         tr("Select Models..."), m_formGroup);
     m_modelPickBtn->setObjectName(QStringLiteral("dialogSecondaryButton"));
     m_modelPickBtn->setCursor(Qt::PointingHandCursor);
     m_modelPickBtn->setToolTip(tr("Open model manager to add, fetch, test and select models"));
-    modelRow->addWidget(m_modelEdit, 1);
-    modelRow->addWidget(m_modelPickBtn);
+    modelBtnRow->addWidget(m_modelPickBtn);
+    modelBtnRow->addStretch();
 
     m_systemPromptEdit = new QPlainTextEdit(m_formGroup);
     m_systemPromptEdit->setObjectName(QStringLiteral("systemPromptEdit"));
@@ -219,7 +221,8 @@ void SettingsDialog::buildProviderFormPanel(QSplitter *splitter)
     formLayout->addRow(tr("Name"),          m_nameEdit);
     formLayout->addRow(tr("Base URL"),      m_baseUrlEdit);
     formLayout->addRow(tr("API Key"),       m_apiKeyEdit);
-    formLayout->addRow(tr("Model"),         modelRow);
+    formLayout->addRow(tr("Model"),         m_modelEdit);
+    formLayout->addRow(QString(),           modelBtnRow);
     formLayout->addRow(tr("System Prompt"), m_systemPromptEdit);
 
     vl->addWidget(m_formGroup, 1);
